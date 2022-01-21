@@ -84,13 +84,17 @@ def deeplearning_mlp(n_steps_out,
     normalized_covid = scaler_covid.transform(data_be_lisse.reshape(-1, 1))
     normalized_trend = scaler_trend.transform(data_de_lisse.reshape(-1, 1))
     
+    # On ajoute l'indicateur saisonier pour le covid
+    x = np.arange(len(data_fr_lisse))
+    feature_saison = np.sin(x*np.pi/12.)
+    feature_saison = feature_saison.reshape(len(data_fr_lisse),1)
     
     data_fr_lisse = normalized_target.reshape(len(data_fr_lisse),1)
     data_be_lisse = normalized_covid.reshape(len(data_fr_lisse),1)
     data_de_lisse = normalized_trend.reshape(len(data_fr_lisse),1)
     
 
-    Data_all_lisse = hstack((data_fr_lisse, data_be_lisse, data_de_lisse))
+    Data_all_lisse = hstack((data_fr_lisse, data_be_lisse, data_de_lisse,feature_saison))
     Data_train = Data_all_lisse[:train,:]
     
     #Data_predict = Data_all_lisse[train,:]
@@ -106,7 +110,7 @@ def deeplearning_mlp(n_steps_out,
     Data_train_SVF = Data_train_SVF.reshape((Data_train_SVF.shape[0], n_input))
     #print(Data_train_SVF)
     model = Sequential()
-    model.add(Dense(50, activation='relu', input_dim=n_input,
+    model.add(Dense(nb_neurones_input, activation='relu', input_dim=n_input,
                     kernel_regularizer=regularisation))
     for i in range(len(nb_neurones_interm)):
         if nb_neurones_interm[i] != 0 :
@@ -129,7 +133,6 @@ def deeplearning_mlp(n_steps_out,
     forecast_be_de = forecast_be_de.reshape(1,n_input)
     #print(forecast_be_de)
     y_predict = model.predict(forecast_be_de, verbose=0)
-    
     y_predict = scaler_target.inverse_transform(y_predict)
     
     return y_predict
@@ -160,13 +163,16 @@ def deeplearning_lstm(n_steps_out,
     normalized_covid = scaler_covid.transform(data_be_lisse.reshape(-1, 1))
     normalized_trend = scaler_trend.transform(data_de_lisse.reshape(-1, 1))
     
+    x = np.arange(len(data_fr_lisse))
+    feature_saison = np.sin(x*np.pi/12.)
+    feature_saison = feature_saison.reshape(len(data_fr_lisse),1)
     
     data_fr_lisse = normalized_target.reshape(len(data_fr_lisse),1)
     data_be_lisse = normalized_covid.reshape(len(data_fr_lisse),1)
     data_de_lisse = normalized_trend.reshape(len(data_fr_lisse),1)
 
 
-    Data_all_lisse = hstack((data_fr_lisse, data_be_lisse, data_de_lisse))
+    Data_all_lisse = hstack((data_fr_lisse, data_be_lisse, data_de_lisse, feature_saison))
     
     Data_train = Data_all_lisse[:train,:]
     #Data_predict = Data_all_lisse[train,:]
@@ -305,12 +311,20 @@ def interface():
     sns.set_theme(style="darkgrid")
     data = pd.read_csv('data_full_be_de_es.csv', sep = ',')
     data = data.set_index(data.columns[0])
+    data[data < 0] = 0
     data.index = data.index.map(lambda x: datetime.strptime(x, "%Y-%m-%d").date())
-    
+    data.index.names = ['Date']
+    data.rename(columns={"Res tourisme Nice Allemagne":
+                         "Résidence de tourisme Nice Allemagne",
+                         "Res tourisme Nice Belgique":
+                         "Résidence de tourisme Nice Belgique",
+                         "Res tourisme Nice Espagne":
+                         "Résidence de tourisme Nice Espagne"},
+                         inplace = True)
     list_col = data.columns
     #list_col = np.delete(list_col, 0)
     
-    var_1 = st.sidebar.selectbox('Sélection de la série à predire',list_col)
+    var_1 = st.sidebar.selectbox('Sélection de la série à prédire',list_col)
     #var_2 = st.sidebar.selectbox('Première feature',list_col)
     #var_3 = st.sidebar.selectbox('Deuxième feature',list_col)
     type_multi = st.sidebar.radio("Ajouter des séries explicatives ?",
