@@ -532,6 +532,7 @@ def interface():
         st.pyplot(plot_result(y_predict,val_target,len_Data_train,data.index,var_1))
     
     #back_test_button = st.checkbox('Réaliser un back test')
+    back_test_button = False
     if back_test_button:
         pourcentage_train = st.number_input("Poucentage du dataset utilisé pour débuter le back test",
                                             value = 80)
