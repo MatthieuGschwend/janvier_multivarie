@@ -485,7 +485,7 @@ def interface():
                             Un réseau est composé de plusieurs couches, chacune des
                             couches comporte un nombre de neurones. Plus le nombre
                             de neurones est grand plus plus le modèle devient capable
-                            apprendre des schémas complexes. Attention : il faut 
+                            d'apprendre des schémas complexes. Attention : il faut 
                             néanmoins adapter cette complexité à celle de notre 
                             problème.""")
                             
@@ -531,7 +531,7 @@ def interface():
         st.success('Done!')
         st.pyplot(plot_result(y_predict,val_target,len_Data_train,data.index,var_1))
     
-    back_test_button = st.checkbox('Réaliser un back test')
+    #back_test_button = st.checkbox('Réaliser un back test')
     if back_test_button:
         pourcentage_train = st.number_input("Poucentage du dataset utilisé pour débuter le back test",
                                             value = 80)
