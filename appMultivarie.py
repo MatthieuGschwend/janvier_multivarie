@@ -18,7 +18,7 @@ from fbprophet import Prophet
 import json
 from numpy import array
 from numpy import hstack
-from keras.models import Model
+#from keras.models import Model
 from keras.models import Sequential
 from keras.layers import Input
 from keras.layers import Dense
